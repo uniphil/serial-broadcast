@@ -1,10 +1,10 @@
 #include "ManySoftSerial.h"
 
-ManySoftSerial printers = ManySoftSerial(8, 9);
+ManySoftSerial printers = ManySoftSerial(9, 8);
 
 void setup() {
-  printers.begin(9600);
-  printers.println("hello");
+  printers.begin(19200);
+  printers.println("oh hi\n\n\n");
 }
 
 void loop() {
