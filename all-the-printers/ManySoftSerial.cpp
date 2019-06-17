@@ -29,12 +29,6 @@ The latest version of this library can always be found at
 http://arduiniana.org.
 */
 
-// When set, _DEBUG co-opts pins 11 and 13 for debugging with an
-// oscilloscope or logic analyzer.  Beware: it also slightly modifies
-// the bit times, so don't rely on it too much at high baud rates
-#define _DEBUG 0
-#define _DEBUG_PIN1 11
-#define _DEBUG_PIN2 13
 // 
 // Includes
 // 
@@ -43,27 +37,6 @@ http://arduiniana.org.
 #include <Arduino.h>
 #include "ManySoftSerial.h"
 #include <util/delay_basic.h>
-
-//
-// Debugging
-//
-// This function generates a brief pulse
-// for debugging or measuring on an oscilloscope.
-#if _DEBUG
-inline void DebugPulse(uint8_t pin, uint8_t count)
-{
-  volatile uint8_t *pport = portOutputRegister(digitalPinToPort(pin));
-
-  uint8_t val = *pport;
-  while (count--)
-  {
-    *pport = val | digitalPinToBitMask(pin);
-    *pport = val;
-  }
-}
-#else
-inline void DebugPulse(uint8_t, uint8_t) {}
-#endif
 
 //
 // Private methods
@@ -77,10 +50,9 @@ inline void ManySoftSerial::tunedDelay(uint16_t delay) {
 //
 // Constructor
 //
-ManySoftSerial::ManySoftSerial(uint8_t transmitPin, bool inverse_logic /* = false */) :
+ManySoftSerial::ManySoftSerial(uint8_t transmitPin) :
   _tx_delay(0),
-  _buffer_overflow(false),
-  _inverse_logic(inverse_logic)
+  _buffer_overflow(false)
 {
   setTX(transmitPin);
 }
@@ -98,9 +70,9 @@ void ManySoftSerial::setTX(uint8_t tx)
   // First write, then set output. If we do this the other way around,
   // the pin would be output low for a short while before switching to
   // output high. Now, it is input with pullup for a short while, which
-  // is fine. With inverse logic, either order is fine.
-  PORTB = _inverse_logic ? 0x00 : 0xFF;  // digitalWrite(tx, _inverse_logic ? LOW : HIGH);
-  DDRB = 0xFF;  // pinMode(tx, OUTPUT);
+  // is fine.
+  PORTB = 0xFF;
+  DDRB = 0xFF;
   _transmitBitMask = 0xFF;
   uint8_t port = digitalPinToPort(tx);
   _transmitPortRegister = portOutputRegister(port);
@@ -129,11 +101,50 @@ void ManySoftSerial::begin(long speed)
   // These are all close enough to just use 15 cycles, since the inter-bit
   // timings are the most critical (deviations stack 8 times)
   _tx_delay = subtract_cap(bit_delay, 15 / 4);
+}
 
-#if _DEBUG
-  pinMode(_DEBUG_PIN1, OUTPUT);
-  pinMode(_DEBUG_PIN2, OUTPUT);
-#endif
+void ManySoftSerial::write8(uint8_t dat[8])
+{  
+  if (_tx_delay == 0) {
+    setWriteError();
+    return 0;
+  }
+
+  // By declaring these as local variables, the compiler will put them
+  // in registers _before_ disabling interrupts and entering the
+  // critical timing sections below, which makes it a lot easier to
+  // verify the cycle timings
+  volatile uint8_t *reg = _transmitPortRegister;
+  uint8_t reg_mask = _transmitBitMask;
+  uint8_t inv_mask = ~_transmitBitMask;
+  uint8_t oldSREG = SREG;
+  uint16_t delay = _tx_delay;
+
+  cli();  // turn off interrupts for a clean txmit
+
+  // Write the start bit
+  *reg &= inv_mask;
+
+  tunedDelay(delay);
+
+  // Write each of the 8 bits
+  for (uint8_t i = 8; i > 0; --i)
+  {
+    if (dat[0] & 1) // choose bit
+      *reg |= reg_mask; // send 1
+    else
+      *reg &= inv_mask; // send 0
+
+    tunedDelay(delay);
+  }
+
+  // restore pin to natural state
+  *reg |= reg_mask;
+
+  SREG = oldSREG; // turn interrupts back on
+  tunedDelay(_tx_delay);
+  
+  return 1;
 }
 
 size_t ManySoftSerial::write(uint8_t b)
@@ -151,19 +162,12 @@ size_t ManySoftSerial::write(uint8_t b)
   uint8_t reg_mask = _transmitBitMask;
   uint8_t inv_mask = ~_transmitBitMask;
   uint8_t oldSREG = SREG;
-  bool inv = _inverse_logic;
   uint16_t delay = _tx_delay;
-
-  if (inv)
-    b = ~b;
 
   cli();  // turn off interrupts for a clean txmit
 
   // Write the start bit
-  if (inv)
-    *reg |= reg_mask;
-  else
-    *reg &= inv_mask;
+  *reg &= inv_mask;
 
   tunedDelay(delay);
 
@@ -180,10 +184,7 @@ size_t ManySoftSerial::write(uint8_t b)
   }
 
   // restore pin to natural state
-  if (inv)
-    *reg &= inv_mask;
-  else
-    *reg |= reg_mask;
+  *reg |= reg_mask;
 
   SREG = oldSREG; // turn interrupts back on
   tunedDelay(_tx_delay);

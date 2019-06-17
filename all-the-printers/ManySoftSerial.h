@@ -53,7 +53,6 @@ private:
   uint16_t _tx_delay;
 
   uint16_t _buffer_overflow:1;
-  uint16_t _inverse_logic:1;
 
   // private methods
   void setTX(uint8_t transmitPin);
@@ -66,7 +65,7 @@ private:
 
 public:
   // public methods
-  ManySoftSerial(uint8_t transmitPin, bool inverse_logic = false);
+  ManySoftSerial(uint8_t transmitPin);
   ~ManySoftSerial();
   void begin(long speed);
   void end() {};
@@ -80,6 +79,8 @@ public:
   operator bool() { return true; }
   
   using Print::write;
+
+  void write8(uint8_t dat[8]);
 
   // public only for easy access by interrupt handlers
   static inline void handle_interrupt() __attribute__((__always_inline__));
