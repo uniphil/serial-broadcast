@@ -66,7 +66,7 @@ private:
 
 public:
   // public methods
-  ManySoftSerial(uint8_t receivePin, uint8_t transmitPin, bool inverse_logic = false);
+  ManySoftSerial(uint8_t transmitPin, bool inverse_logic = false);
   ~ManySoftSerial();
   void begin(long speed);
   void end() {};
@@ -76,7 +76,7 @@ public:
   virtual size_t write(uint8_t byte);
   virtual int read() { return -1; }
   virtual int available() { return false; }
-  virtual void flush();
+  virtual void flush() { /* There is no tx buffering, simply return */ }
   operator bool() { return true; }
   
   using Print::write;

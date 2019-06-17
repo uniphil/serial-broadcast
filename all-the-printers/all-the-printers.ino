@@ -1,6 +1,6 @@
 #include "ManySoftSerial.h"
 
-ManySoftSerial printers = ManySoftSerial(9, 8);
+ManySoftSerial printers = ManySoftSerial(8);
 
 void setup() {
   printers.begin(19200);

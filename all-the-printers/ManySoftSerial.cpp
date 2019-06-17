@@ -77,7 +77,7 @@ inline void ManySoftSerial::tunedDelay(uint16_t delay) {
 //
 // Constructor
 //
-ManySoftSerial::ManySoftSerial(uint8_t receivePin, uint8_t transmitPin, bool inverse_logic /* = false */) : 
+ManySoftSerial::ManySoftSerial(uint8_t transmitPin, bool inverse_logic /* = false */) :
   _tx_delay(0),
   _buffer_overflow(false),
   _inverse_logic(inverse_logic)
@@ -99,9 +99,9 @@ void ManySoftSerial::setTX(uint8_t tx)
   // the pin would be output low for a short while before switching to
   // output high. Now, it is input with pullup for a short while, which
   // is fine. With inverse logic, either order is fine.
-  digitalWrite(tx, _inverse_logic ? LOW : HIGH);
-  pinMode(tx, OUTPUT);
-  _transmitBitMask = digitalPinToBitMask(tx);
+  PORTB = _inverse_logic ? 0x00 : 0xFF;  // digitalWrite(tx, _inverse_logic ? LOW : HIGH);
+  DDRB = 0xFF;  // pinMode(tx, OUTPUT);
+  _transmitBitMask = 0xFF;
   uint8_t port = digitalPinToPort(tx);
   _transmitPortRegister = portOutputRegister(port);
 }
@@ -189,10 +189,5 @@ size_t ManySoftSerial::write(uint8_t b)
   tunedDelay(_tx_delay);
   
   return 1;
-}
-
-void ManySoftSerial::flush()
-{
-  // There is no tx buffering, simply return
 }
 
