@@ -46,8 +46,6 @@ private:
   // per object data
   uint8_t _transmitBitMask;
   volatile uint8_t *_transmitPortRegister;
-  volatile uint8_t *_pcint_maskreg;
-  uint8_t _pcint_maskvalue;
 
   // Expressed as 4-cycle delays (must never be 0!)
   uint16_t _tx_delay;
@@ -61,7 +59,7 @@ private:
 public:
   // public methods
   ManySoftSerial(uint8_t pin0, uint8_t mask = 0xFF);
-  ~ManySoftSerial();
+  ~ManySoftSerial() { end(); }
   void begin(long speed);
   void end() {};
   int peek() { return -1; }
@@ -75,9 +73,6 @@ public:
   using Print::write;
 
   void write8(uint8_t dat[8]);
-
-  // public only for easy access by interrupt handlers
-  static inline void handle_interrupt() __attribute__((__always_inline__));
 };
 
 #endif

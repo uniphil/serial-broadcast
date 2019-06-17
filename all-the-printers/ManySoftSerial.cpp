@@ -32,8 +32,6 @@ http://arduiniana.org.
 // 
 // Includes
 // 
-#include <avr/interrupt.h>
-#include <avr/pgmspace.h>
 #include <Arduino.h>
 #include "ManySoftSerial.h"
 #include <util/delay_basic.h>
@@ -64,14 +62,6 @@ ManySoftSerial::ManySoftSerial(uint8_t pin0, uint8_t mask) : _tx_delay(0)
   *_transmitPortRegister |= _transmitBitMask;
 
   *portModeRegister(port) |= _transmitBitMask;
-}
-
-//
-// Destructor
-//
-ManySoftSerial::~ManySoftSerial()
-{
-  end();
 }
 
 uint16_t ManySoftSerial::subtract_cap(uint16_t num, uint16_t sub) {
