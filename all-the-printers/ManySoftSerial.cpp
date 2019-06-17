@@ -50,11 +50,11 @@ inline void ManySoftSerial::tunedDelay(uint16_t delay) {
 //
 // Constructor
 //
-ManySoftSerial::ManySoftSerial(uint8_t transmitPin) :
+ManySoftSerial::ManySoftSerial(uint8_t pin0, uint8_t mask) :
   _tx_delay(0),
   _buffer_overflow(false)
 {
-  setTX(transmitPin);
+  setTX(pin0, mask);
 }
 
 //
@@ -65,17 +65,20 @@ ManySoftSerial::~ManySoftSerial()
   end();
 }
 
-void ManySoftSerial::setTX(uint8_t tx)
+void ManySoftSerial::setTX(uint8_t pin0, uint8_t mask)
 {
   // First write, then set output. If we do this the other way around,
   // the pin would be output low for a short while before switching to
   // output high. Now, it is input with pullup for a short while, which
   // is fine.
-  PORTB = 0xFF;
-  DDRB = 0xFF;
-  _transmitBitMask = 0xFF;
-  uint8_t port = digitalPinToPort(tx);
+  _transmitBitMask = mask;
+
+  uint8_t port = digitalPinToPort(pin0);
+
   _transmitPortRegister = portOutputRegister(port);
+  *_transmitPortRegister |= _transmitBitMask;
+
+  *portModeRegister(port) |= _transmitBitMask;
 }
 
 uint16_t ManySoftSerial::subtract_cap(uint16_t num, uint16_t sub) {
@@ -128,7 +131,9 @@ void ManySoftSerial::write8(uint8_t dat[8])
   tunedDelay(delay);
 
   for (uint8_t i = 0; i < 8; i++) {
-    *reg = dat[7 - i];
+    uint8_t b = dat[7 - i];
+    *reg |= b & reg_mask;
+    *reg &= b | inv_mask;
     tunedDelay(delay);
   }
 

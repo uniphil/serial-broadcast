@@ -55,7 +55,7 @@ private:
   uint16_t _buffer_overflow:1;
 
   // private methods
-  void setTX(uint8_t transmitPin);
+  void setTX(uint8_t pin0, uint8_t mask);
 
   // Return num - sub, or 1 if the result would be < 1
   static uint16_t subtract_cap(uint16_t num, uint16_t sub);
@@ -65,7 +65,7 @@ private:
 
 public:
   // public methods
-  ManySoftSerial(uint8_t transmitPin);
+  ManySoftSerial(uint8_t pin0, uint8_t mask = 0xFF);
   ~ManySoftSerial();
   void begin(long speed);
   void end() {};
