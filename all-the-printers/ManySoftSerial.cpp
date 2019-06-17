@@ -50,22 +50,7 @@ inline void ManySoftSerial::tunedDelay(uint16_t delay) {
 //
 // Constructor
 //
-ManySoftSerial::ManySoftSerial(uint8_t pin0, uint8_t mask) :
-  _tx_delay(0),
-  _buffer_overflow(false)
-{
-  setTX(pin0, mask);
-}
-
-//
-// Destructor
-//
-ManySoftSerial::~ManySoftSerial()
-{
-  end();
-}
-
-void ManySoftSerial::setTX(uint8_t pin0, uint8_t mask)
+ManySoftSerial::ManySoftSerial(uint8_t pin0, uint8_t mask) : _tx_delay(0)
 {
   // First write, then set output. If we do this the other way around,
   // the pin would be output low for a short while before switching to
@@ -79,6 +64,14 @@ void ManySoftSerial::setTX(uint8_t pin0, uint8_t mask)
   *_transmitPortRegister |= _transmitBitMask;
 
   *portModeRegister(port) |= _transmitBitMask;
+}
+
+//
+// Destructor
+//
+ManySoftSerial::~ManySoftSerial()
+{
+  end();
 }
 
 uint16_t ManySoftSerial::subtract_cap(uint16_t num, uint16_t sub) {

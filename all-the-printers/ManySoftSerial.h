@@ -52,11 +52,6 @@ private:
   // Expressed as 4-cycle delays (must never be 0!)
   uint16_t _tx_delay;
 
-  uint16_t _buffer_overflow:1;
-
-  // private methods
-  void setTX(uint8_t pin0, uint8_t mask);
-
   // Return num - sub, or 1 if the result would be < 1
   static uint16_t subtract_cap(uint16_t num, uint16_t sub);
 
@@ -69,7 +64,6 @@ public:
   ~ManySoftSerial();
   void begin(long speed);
   void end() {};
-  bool overflow() { bool ret = _buffer_overflow; if (ret) _buffer_overflow = false; return ret; }
   int peek() { return -1; }
 
   virtual size_t write(uint8_t byte);
