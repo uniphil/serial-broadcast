@@ -15,6 +15,11 @@ void setup() {
 //  printers.write8(nl);
 //  printers.write8(nl);
 
+               // 1 1 0 1 0 0 1 1
+               // 1 1 0 0 1 0 1 1
+  printers.write8(0,1,0,0,1,0,1,1);
+  printers.write8(0,1,0,0,1,0,1,1);
+
   printers.println("\nhello\n\n\n");
 }
 

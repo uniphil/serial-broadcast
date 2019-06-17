@@ -80,7 +80,7 @@ public:
   
   using Print::write;
 
-  void write8(uint8_t dat[8]);
+  void write8(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uint8_t b5, uint8_t b6, uint8_t b7);
 
   // public only for easy access by interrupt handlers
   static inline void handle_interrupt() __attribute__((__always_inline__));
