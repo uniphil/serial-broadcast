@@ -103,9 +103,7 @@ void ManySoftSerial::begin(long speed)
   _tx_delay = subtract_cap(bit_delay, 15 / 4);
 }
 
-#define EX 2
-
-void ManySoftSerial::write8(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, uint8_t b5, uint8_t b6, uint8_t b7)
+void ManySoftSerial::write8(uint8_t dat[8])
 {  
   if (_tx_delay == 0) {
     setWriteError();
@@ -127,34 +125,12 @@ void ManySoftSerial::write8(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3, uint
   // Write the start bit
   *reg &= inv_mask;
 
-  tunedDelay(delay + EX);
+  tunedDelay(delay);
 
-  // Write each of the 8 bits
-  *reg = b7;
-  tunedDelay(delay + EX);
-  *reg = b6;
-  tunedDelay(delay + EX);
-  *reg = b5;
-  tunedDelay(delay + EX);
-  *reg = b4;
-  tunedDelay(delay + EX);
-  *reg = b3;
-  tunedDelay(delay + EX);
-  *reg = b2;
-  tunedDelay(delay + EX);
-  *reg = b1;
-  tunedDelay(delay + EX);
-  *reg = b0;
-  tunedDelay(delay + EX);
-//  for (uint8_t i = 8; i > 0; --i)
-//  {
-//    if (dat[0] & 1) // choose bit
-//      *reg |= reg_mask; // send 1
-//    else
-//      *reg &= inv_mask; // send 0
-//
-//    tunedDelay(delay);
-//  }
+  for (uint8_t i = 0; i < 8; i++) {
+    *reg = dat[7 - i];
+    tunedDelay(delay);
+  }
 
   // restore pin to natural state
   *reg |= reg_mask;
