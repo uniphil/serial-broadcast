@@ -56,34 +56,6 @@ void loop() {
     Serial.write(0b11111000 | command);
     break;
   }
-//
-//  switch (state) {
-//
-//  case WAITING:
-//    if (!Serial.available()) return;
-////    b_printers.println("go go row");
-//    state = BEGIN_ROW;
-//    return;
-//
-//  case BEGIN_ROW:
-//    im_row(b_printers);
-//    state = PRINT_ROW;
-//    return;
-//
-//  case PRINT_ROW:
-//    for (size_t i = 0; i < ROW_BYTES; i++) {
-//      for (size_t bi = 0; bi < 8; bi++) {
-//        while (Serial.available() < 8);
-//        Serial.readBytes(b_buff, 8);
-//        Serial.write(b_buff, 8);
-////        b_buff[bi] = Serial.read();
-//      }
-//      b_printers.write8(b_buff);
-//    }
-//    state = WAITING;
-//    return;
-//
-//  }
 }
 
 void im_row(Stream & s) {
