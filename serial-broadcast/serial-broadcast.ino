@@ -12,12 +12,13 @@
 
 // asdf
 #define CMD_PATTERN 0b11011000
+#define CHUNK_BYTES 8
 
 ManySoftSerial b_printers = ManySoftSerial(8, 0b00111111);
 
 uint8_t state = WAITING;
 
-uint8_t b_buff[16];
+uint8_t b_buff[CHUNK_BYTES * 8];
 uint8_t b_idx = 0;
 
 
@@ -44,12 +45,13 @@ void loop() {
 
   case 2:  // write8
     Serial.write(2);
-    uint8_t n = Serial.readBytes(b_buff, 16);
-    if (n != 16) {
+    uint8_t n = Serial.readBytes(b_buff, CHUNK_BYTES * 8);
+    if (n != CHUNK_BYTES * 8) {
       Serial.write(0b10000000 | n);
     }
-    b_printers.write8(b_buff);
-    b_printers.write8((uint8_t*)(b_buff + 8));
+    for (int o = 0; o < CHUNK_BYTES; o++) {
+      b_printers.write8((uint8_t*)(b_buff + o * 8));
+    }
     Serial.write(3);
     break;
 

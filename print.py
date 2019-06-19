@@ -9,7 +9,7 @@ PRINTER_WIDTH = 384
 
 CMD_PATTERN = 0b11011000
 
-CHUNK_SIZE = 16
+CHUNK_SIZE = 64
 def write_chunked(s, data):
     for i in range(0, len(data), CHUNK_SIZE):
         s.reset_input_buffer()
