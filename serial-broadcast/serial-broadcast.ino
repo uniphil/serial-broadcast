@@ -23,7 +23,7 @@ uint8_t b_idx = 0;
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(500000);
   b_printers.begin(19200);
   b_printers.setTimeout(500);
   delay(100);

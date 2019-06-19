@@ -85,7 +85,7 @@ if __name__ == '__main__':
                 '\n'.join(map(lambda m: '{}\t{}\t{}'.format(m.device, m.description, m.manufacturer), maybes))))
             sys.exit(1)
         port = maybes[0].device
-    s = Serial(port, 115200, timeout=1.3)
+    s = Serial(port, 500000, timeout=1.3)
     sleep(1.3)
     ims = [Image.open(f) for f in filenames]
     while True:
