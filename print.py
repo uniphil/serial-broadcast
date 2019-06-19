@@ -9,7 +9,7 @@ PRINTER_WIDTH = 384
 
 CMD_PATTERN = 0b11011000
 
-CHUNK_SIZE = 8
+CHUNK_SIZE = 16
 def write_chunked(s, data):
     for i in range(0, len(data), CHUNK_SIZE):
         s.reset_input_buffer()
@@ -42,8 +42,6 @@ def print_im(im, s):
     for y in range(im.height):
         t0 = time()
         print('# row {}'.format(y))
-
-        out = None
 
         while True:
             s.reset_input_buffer()
