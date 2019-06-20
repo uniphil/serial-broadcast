@@ -41,23 +41,24 @@ void loop() {
   case 1:  // start row
     im_row(b_printers);
     Serial.write(1);
-    break;
+    return;
 
   case 2:  // write8
     Serial.write(2);
     uint8_t n = Serial.readBytes(b_buff, CHUNK_BYTES * 8);
     if (n != CHUNK_BYTES * 8) {
       Serial.write(0b10000000 | n);
+      return;
     }
     for (int o = 0; o < CHUNK_BYTES; o++) {
       b_printers.write8((uint8_t*)(b_buff + o * 8));
     }
     Serial.write(3);
-    break;
+    return;
 
   default:
     Serial.write(0b11111000 | command);
-    break;
+    return;
   }
 }
 

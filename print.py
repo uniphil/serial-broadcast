@@ -4,7 +4,7 @@ from serial.tools import list_ports
 from PIL import Image
 from time import sleep, time
 
-PRINTERS = 2
+PRINTERS = 4
 PRINTER_WIDTH = 384
 
 CMD_PATTERN = 0b11011000
@@ -34,6 +34,7 @@ def write_chunked(s, data):
 def print_im(im, s):
     width = PRINTERS * PRINTER_WIDTH
     ratio = im.height / im.width
+    im = im.rotate(180)
     im = im.resize((width, int(round(width * ratio))), resample=Image.LANCZOS)
     im = im.convert('1')
 
@@ -68,6 +69,7 @@ def print_im(im, s):
         write_chunked(s, out)
 
         print('dt', time() - t0)
+        sleep(0.02)
 
 
 if __name__ == '__main__':
