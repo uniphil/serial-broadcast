@@ -2,31 +2,22 @@
 
 #define ROW_BYTES 48
 
-// states
-#define WAITING 0
-
-// messages
-#define READY 0
-#define BEGIN_ROW 1
-#define PRINT_ROW 2
-
 // asdf
 #define CMD_PATTERN 0b11011000
 #define CHUNK_BYTES 8
 
-ManySoftSerial b_printers = ManySoftSerial(8, 0b00111111);
-
-uint8_t state = WAITING;
+ManySoftSerial c_printers = ManySoftSerial(A0, 0b00000111);
+ManySoftSerial b_printers = ManySoftSerial(8, 0b00001111);
 
 uint8_t b_buff[CHUNK_BYTES * 8];
-uint8_t b_idx = 0;
 
 
 void setup() {
   Serial.begin(500000);
+  c_printers.begin(9600);
+  c_printers.setTimeout(500);
   b_printers.begin(19200);
   b_printers.setTimeout(500);
-  delay(100);
 }
 
 void loop() {
@@ -39,6 +30,7 @@ void loop() {
 
   switch (command & 0b0000111) {
   case 1:  // start row
+    im_row(c_printers);
     im_row(b_printers);
     Serial.write(1);
     return;
@@ -52,6 +44,12 @@ void loop() {
     }
     for (int o = 0; o < CHUNK_BYTES; o++) {
       b_printers.write8((uint8_t*)(b_buff + o * 8));
+    }
+    for (int i = 0; i < CHUNK_BYTES * 8; i++) {
+     b_buff[i] >>= 4;
+    }
+    for (int o = 0; o < CHUNK_BYTES; o++) {
+      c_printers.write8((uint8_t*)(b_buff + o * 8));
     }
     Serial.write(3);
     return;

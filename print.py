@@ -4,8 +4,10 @@ from serial.tools import list_ports
 from PIL import Image
 from time import sleep, time
 
-PRINTERS = 4
+C_PRINTERS = 3
+B_PRINTERS = 4
 PRINTER_WIDTH = 384
+ROW_OFFSET = 72 * 8  # 72mm * 8px/mm
 
 CMD_PATTERN = 0b11011000
 
@@ -32,7 +34,7 @@ def write_chunked(s, data):
 
 
 def print_im(im, s):
-    width = PRINTERS * PRINTER_WIDTH
+    width = (C_PRINTERS + B_PRINTERS) * PRINTER_WIDTH
     ratio = im.height / im.width
     im = im.rotate(180)
     im = im.resize((width, int(round(width * ratio))), resample=Image.LANCZOS)
@@ -40,7 +42,7 @@ def print_im(im, s):
 
     print('resized to', im.size)
 
-    for y in range(im.height):
+    for y in range(im.height - ROW_OFFSET):
         t0 = time()
         print('# row {}'.format(y))
 
@@ -61,8 +63,12 @@ def print_im(im, s):
         out = bytearray([])
         for x in range(PRINTER_WIDTH):
             b = 0
-            for p in range(PRINTERS):
-                px = im.getpixel((p * PRINTER_WIDTH + x, y))
+            for p in range(C_PRINTERS):
+                px = im.getpixel(((p * 2 + 1) * PRINTER_WIDTH + x, y + ROW_OFFSET))
+                black = px < 128
+                b |= black << (p + B_PRINTERS)
+            for p in range(B_PRINTERS):
+                px = im.getpixel((p * 2 * PRINTER_WIDTH + x, y))
                 black = px < 128
                 b |= black << p
             out.append(b)
